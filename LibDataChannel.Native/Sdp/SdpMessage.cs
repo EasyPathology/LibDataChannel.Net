@@ -1,15 +1,10 @@
 ﻿namespace LibDataChannel.Native.Sdp;
 
-public readonly struct SdpMessage
+[Serializable]
+public readonly struct SdpMessage(SdpType type, string content)
 {
-    public SdpType Type { get; }
-    public string Content { get; }
-
-    public SdpMessage(SdpType type, string content)
-    {
-        Type = type;
-        Content = content;
-    }
+    public SdpType Type { get; init; } = type;
+    public string Content { get; init; } = content;
 
     public override string ToString()
     {

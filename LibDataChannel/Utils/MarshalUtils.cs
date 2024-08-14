@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 
 internal static class MarshalUtils
 {
-    public static IntPtr StringArrayToPtr(string[] array)
+    public static IntPtr StringArrayToPtr(string[]? array)
     {
         if (array == null)
             return IntPtr.Zero;

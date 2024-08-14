@@ -1,7 +1,7 @@
-﻿namespace LibDataChannel.Native.Connections.Rtc;
-
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 using LibDataChannel.Native.Sdp;
+
+namespace LibDataChannel.Native.Connections.Rtc;
 
 /// <summary>
 ///     Handle for a peer connection.

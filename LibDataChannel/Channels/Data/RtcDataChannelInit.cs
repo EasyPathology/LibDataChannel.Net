@@ -13,12 +13,12 @@ public class RtcDataChannelInit
     /// <summary>
     ///     The reliability of the channel.
     /// </summary>
-    public RtcReliability Reliability { get; set; }
+    public RtcReliability? Reliability { get; set; }
     
     /// <summary>
     ///     The sub-protocol used for the channel.
     /// </summary>
-    public string Protocol { get; set; }
+    public string? Protocol { get; set; }
     
     /// <summary>
     ///     True if the channel is assumed to be negotiated by the user and won't be negotiated by the WebRTC layer.
@@ -40,7 +40,7 @@ public class RtcDataChannelInit
         }
     }
 
-    internal NativeRtcDataChannelInit AllocNative() => new NativeRtcDataChannelInit
+    internal NativeRtcDataChannelInit AllocNative() => new()
     {
         Reliability = Reliability != null ? Reliability.AllocNative() : default,
         Protocol = Marshal.StringToHGlobalAnsi(Protocol),

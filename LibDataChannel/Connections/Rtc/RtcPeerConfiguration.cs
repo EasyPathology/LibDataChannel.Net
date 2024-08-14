@@ -1,8 +1,8 @@
-﻿namespace LibDataChannel.Connections.Rtc;
-
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 using LibDataChannel.Native.Connections.Rtc;
 using LibDataChannel.Utils;
+
+namespace LibDataChannel.Connections.Rtc;
 
 /// <summary>
 ///     Represents the initial configuration of a RTC peer connection.
@@ -14,12 +14,12 @@ public class RtcPeerConfiguration
     ///     Example: stun:stun.l.google.com:19302
     ///     Example: turn:myuser:12345678@turnserver.org:3478?transport=udp
     /// </summary>
-    public string[] IceServers { get; set; }
+    public string[]? IceServers { get; set; }
     
     /// <summary>
     ///     Bind address to use.
     /// </summary>
-    public string BindAddress { get; set; }
+    public string? BindAddress { get; set; }
     
     /// <summary>
     ///     Type of certificate to use.

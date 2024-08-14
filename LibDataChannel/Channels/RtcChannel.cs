@@ -2,7 +2,7 @@
 
 using LibDataChannel.Native.Channels;
 
-public abstract class RtcChannel : NativeRtcChannelHandle
+public abstract class RtcChannel(int id) : NativeRtcChannelHandle(id)
 {
     public delegate void OpenCallback();
     public delegate void ClosedCallback();
@@ -13,37 +13,37 @@ public abstract class RtcChannel : NativeRtcChannelHandle
 
     private bool _isMessageEventSet;
     
-    private event MessageCallback OnMessagePrivateCallback;
+    private event MessageCallback? OnMessagePrivateCallback;
     
     /// <summary>
     ///     Called when the channel is opened.
     /// </summary>
-    public event OpenCallback OnOpen;
+    public event OpenCallback? OnOpen;
     
     /// <summary>
     ///     Called when the channel is closed.
     /// </summary>
-    public event ClosedCallback OnClosed;
+    public event ClosedCallback? OnClosed;
     
     /// <summary>
     ///     Called when an error occurs.
     /// </summary>
-    public event ErrorCallback OnError;
+    public event ErrorCallback? OnError;
     
     /// <summary>
     ///     Called when the buffered amount of data is low.
     /// </summary>
-    public event BufferedAmountLowCallback OnBufferedAmountLow;
+    public event BufferedAmountLowCallback? OnBufferedAmountLow;
     
     /// <summary>
     ///     Called when data is available.
     /// </summary>
-    public event AvailableCallback OnAvailable;
+    public event AvailableCallback? OnAvailable;
     
     /// <summary>
     ///     Called when a message is received.
     /// </summary>
-    public event MessageCallback OnMessage
+    public event MessageCallback? OnMessage
     {
         add
         {
@@ -72,11 +72,7 @@ public abstract class RtcChannel : NativeRtcChannelHandle
             }
         }
     }
-    
-    protected RtcChannel(int id) : base(id)
-    {
-    }
-    
+
     protected override void OnDispose()
     {
         lock (SyncRoot)

@@ -35,7 +35,7 @@ public class RtcReliability
         MaxRetransmits = MaxRetransmits
     };
 
-    internal static RtcReliability FromNative(NativeRtcReliability native)
+    internal static RtcReliability? FromNative(NativeRtcReliability native)
     {
         return new RtcReliability
         {

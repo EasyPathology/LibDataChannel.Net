@@ -1,7 +1,7 @@
-﻿namespace LibDataChannel.Native;
-
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 using LibDataChannel.Native.Utils;
+
+namespace LibDataChannel.Native;
 
 public abstract class NativeRtcHandle : IDisposable
 {

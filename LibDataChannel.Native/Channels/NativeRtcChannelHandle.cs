@@ -26,10 +26,11 @@ public abstract class NativeRtcChannelHandle : NativeRtcHandle
 
     protected internal abstract void Internal_OnOpen();
     protected internal abstract void Internal_OnClosed();
-    protected internal abstract void Internal_OnError(string error);
+    protected internal abstract void Internal_OnError(string? error);
     protected internal abstract void Internal_OnMessage(ReadOnlySpan<byte> message);
     protected internal abstract void Internal_OnBufferedAmountLow();
     protected internal abstract void Internal_OnAvailable();
 
-    public static NativeRtcChannelHandle FromHandle(IntPtr ptr) => (NativeRtcChannelHandle) GCHandle.FromIntPtr(ptr).Target;
+    public static NativeRtcChannelHandle FromHandle(IntPtr ptr) => 
+        GCHandle.FromIntPtr(ptr).Target as NativeRtcChannelHandle ?? throw new InvalidOperationException("Invalid handle");
 }

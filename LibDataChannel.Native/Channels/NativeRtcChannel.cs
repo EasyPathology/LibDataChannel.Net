@@ -1,8 +1,8 @@
-﻿namespace LibDataChannel.Native.Channels;
-
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using LibDataChannel.Native.Utils;
+
+namespace LibDataChannel.Native.Channels;
 
 /// <summary>
 ///     Represents the list of functions used by <see cref="NativeRtcChannelHandle"/>.

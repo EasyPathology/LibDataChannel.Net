@@ -15,5 +15,5 @@ public abstract class RtcLogger : IDisposable
         NativeRtcLogger.Detach(this);
     }
 
-    public abstract void Log(RtcLogLevel level, string message);
+    public abstract void Log(RtcLogLevel level, string? message);
 }

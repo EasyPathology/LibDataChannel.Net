@@ -1,9 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net6.0</TargetFramework>
+        <TargetFramework>net8.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>disable</Nullable>
+        <Nullable>enable</Nullable>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 
         <Title>LibDataChannel.Net.Native</Title>
@@ -16,43 +16,28 @@
         <PackageReleaseNotes>Initial library version.</PackageReleaseNotes>
         <AssemblyVersion>0.0.1</AssemblyVersion>
     </PropertyGroup>
-    
-    <ItemGroup>
-        <Content Include="Library\win-x64\datachannel.dll">
-            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-            <TargetPath>datachannel.dll</TargetPath>
-            <PackagePath>lib\win\datachannel.dll</PackagePath>
-            <Pack>true</Pack>
-        </Content>
-        <Content Include="Library\win-x64\libcrypto-3-x64.dll">
-            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-            <TargetPath>libcrypto-3-x64.dll</TargetPath>
-            <PackagePath>lib\win\datachannel.dll</PackagePath>
-            <Pack>true</Pack>
-        </Content>
-        <Content Include="Library\win-x64\libssl-3-x64.dll">
-            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-            <TargetPath>libssl-3-x64.dll</TargetPath>
-            <PackagePath>lib\win\datachannel.dll</PackagePath>
-            <Pack>true</Pack>
-        </Content>
+
+    <ItemGroup Condition="'$(OS)' == 'Windows_NT'">
+        <None Update="runtimes\win-x64\native\datachannel.dll">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+        <None Update="runtimes\win-x64\native\libcrypto-3-x64.dll">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+        <None Update="runtimes\win-x64\native\libssl-3-x64.dll">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
     </ItemGroup>
 
-    <ItemGroup>
-        <Content Include="Library\libdatachannel.dylib">
-            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-            <TargetPath>libdatachannel.dylib</TargetPath>
-            <PackagePath>lib\osx\libdatachannel.dylib</PackagePath>
-            <Pack>true</Pack>
-        </Content>
+    <ItemGroup Condition="'$(OS)' == 'Unix'">
+        <None Update="runtimes\osx-x64\native\libdatachannel.dylib">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
     </ItemGroup>
 
-    <ItemGroup>
-        <Content Include="Library\libdatachannel.so">
-            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-            <TargetPath>libdatachannel.so</TargetPath>
-            <PackagePath>lib\linux\libdatachannel.so</PackagePath>
-            <Pack>true</Pack>
-        </Content>
+    <ItemGroup Condition="'$(OS)' == 'Linux'">
+        <None Update="runtimes\linux-x64\native\libdatachannel.so">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
     </ItemGroup>
 </Project>

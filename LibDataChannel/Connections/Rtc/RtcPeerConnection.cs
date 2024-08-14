@@ -1,10 +1,10 @@
-﻿namespace LibDataChannel.Connections.Rtc;
-
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Net;
 using LibDataChannel.Channels.Data;
 using LibDataChannel.Native.Connections.Rtc;
 using LibDataChannel.Native.Sdp;
+
+namespace LibDataChannel.Connections.Rtc;
 
 /// <summary>
 ///     Represents a RTC Peer Connection.
@@ -53,38 +53,38 @@ public class RtcPeerConnection : NativeRtcPeerConnectionHandle
     /// <summary>
     ///     Callback for when a new data channel is created by the host.
     /// </summary>
-    public event DataChannelCallback OnDataChannel;
+    public event DataChannelCallback? OnDataChannel;
     
     /// <summary>
     ///     Callback for when the local description is set.
     /// </summary>
-    public event LocalDescriptionCallback OnLocalDescription;
+    public event LocalDescriptionCallback? OnLocalDescription;
     
     /// <summary>
     ///     Callback for when the local candidate is set.
     /// </summary>
-    public event LocalCandidateCallback OnLocalCandidate;
+    public event LocalCandidateCallback? OnLocalCandidate;
     
     /// <summary>
     ///     Callback for when the state of the peer connection changes.
     /// </summary>
-    public event StateChangeCallback OnStateChange;
+    public event StateChangeCallback? OnStateChange;
     
     /// <summary>
     ///     Callback for when the state of the gathering process changes.
     /// </summary>
-    public event GatheringStateChangeCallback OnGatheringStateChange;
+    public event GatheringStateChangeCallback? OnGatheringStateChange;
     
     /// <summary>
     ///     Callback for when the state of the signaling process changes.
     /// </summary>
-    public event SignalingStateChangeCallback OnSignalingStateChange;
+    public event SignalingStateChangeCallback? OnSignalingStateChange;
 
     /// <summary>
     ///     Creates a new RTC Peer Connection.
     /// </summary>
     /// <param name="configuration">the configuration.</param>
-    public RtcPeerConnection(RtcPeerConfiguration configuration = null) 
+    public RtcPeerConnection(RtcPeerConfiguration? configuration = null) 
         : base(NativeRtcPeerConnection.Create(configuration != null ? configuration.AllocNative() : default))
     {
         _dataChannels = new List<RtcDataChannel>();

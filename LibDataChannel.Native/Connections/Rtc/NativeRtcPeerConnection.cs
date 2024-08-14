@@ -1,12 +1,12 @@
-﻿namespace LibDataChannel.Native.Connections.Rtc;
-
-using System.Net;
+﻿using System.Net;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using LibDataChannel.Native.Exceptions;
 using LibDataChannel.Native.Sdp;
 using LibDataChannel.Native.Utils;
+
+namespace LibDataChannel.Native.Connections.Rtc;
 
 /// <summary>
 ///     Represents the list of functions used by the <see cref="NativeRtcPeerConnectionHandle"/>.
@@ -279,7 +279,9 @@ public static class NativeRtcPeerConnection
     private static void LocalCandidateCallback(int id, IntPtr candidate, IntPtr mid, IntPtr userPointer)
     {
         ThreadUtils.SetRtcThread();
-        RtcIceCandidate iceCandidate = new RtcIceCandidate(Marshal.PtrToStringAnsi(candidate), Marshal.PtrToStringAnsi(mid));
+        RtcIceCandidate iceCandidate = new RtcIceCandidate(
+            Marshal.PtrToStringAnsi(candidate) ?? string.Empty, 
+            Marshal.PtrToStringAnsi(mid) ?? string.Empty);
         NativeRtcPeerConnectionHandle.FromHandle(userPointer).Internal_OnLocalCandidate(iceCandidate);
     }
     
