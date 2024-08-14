@@ -40,7 +40,9 @@ public static class NativeRtcPeerConnection
     {
         try
         {
-            return NativeRtc.CreatePeerConnection((IntPtr) (&configuration));
+            var ret = NativeRtc.CreatePeerConnection((IntPtr) (&configuration));
+            if (ret < 0) NativeRtc.ThrowException(ret);
+            return ret;
         }
         finally
         {
@@ -129,6 +131,9 @@ public static class NativeRtcPeerConnection
         }
     }
     
+    public static bool HasLocalDescription(NativeRtcPeerConnectionHandle handle) => 
+        NativeRtc.GetLocalDescription(handle.Id, IntPtr.Zero, 0) > 0;
+    
     /// <summary>
     ///     Gets the local description from the peer connection.
     /// </summary>
@@ -144,6 +149,9 @@ public static class NativeRtcPeerConnection
         
         return Marshal.PtrToStringAnsi((IntPtr) buffer, size - 1);
     }
+
+    public static bool HasRemoteDescription(NativeRtcPeerConnectionHandle handle) => 
+        NativeRtc.GetRemoteDescription(handle.Id, IntPtr.Zero, 0) > 0;
     
     /// <summary>
     ///     Gets the remote description from the peer connection.
@@ -271,7 +279,7 @@ public static class NativeRtcPeerConnection
     private static void RtcDescriptionCallback(int id, IntPtr sdp, IntPtr type, IntPtr userPointer)
     {
         ThreadUtils.SetRtcThread();
-        SdpMessage sessionDescription = new SdpMessage(Enum.Parse<SdpType>(Marshal.PtrToStringAnsi(type)!, true), Marshal.PtrToStringAnsi(sdp));
+        SdpMessage sessionDescription = new SdpMessage(Enum.Parse<SdpType>(Marshal.PtrToStringAnsi(type)!, true), Marshal.PtrToStringAnsi(sdp)!);
         NativeRtcPeerConnectionHandle.FromHandle(userPointer).Internal_OnLocalDescription(sessionDescription);
     }
 

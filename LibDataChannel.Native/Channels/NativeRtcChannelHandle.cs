@@ -1,6 +1,6 @@
-﻿namespace LibDataChannel.Native.Channels;
+﻿using System.Runtime.InteropServices;
 
-using System.Runtime.InteropServices;
+namespace LibDataChannel.Native.Channels;
 
 /// <summary>
 ///     Handle for a data channel.

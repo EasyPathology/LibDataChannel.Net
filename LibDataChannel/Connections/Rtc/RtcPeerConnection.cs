@@ -101,16 +101,17 @@ public class RtcPeerConnection : NativeRtcPeerConnectionHandle
         
         base.OnDispose();
     }
+    
+    public bool HasLocalDescription => NativeRtcPeerConnection.HasLocalDescription(this);
 
     /// <summary>
     ///     Local description of the peer connection.
     /// </summary>
-    public SdpMessage LocalDescription
-    {
-        get => new SdpMessage(
-            NativeRtcPeerConnection.GetLocalDescriptionType(this),
-            NativeRtcPeerConnection.GetLocalDescription(this));
-    }
+    public SdpMessage LocalDescription => new SdpMessage(
+        NativeRtcPeerConnection.GetLocalDescriptionType(this),
+        NativeRtcPeerConnection.GetLocalDescription(this));
+
+    public bool HasRemoteDescription => NativeRtcPeerConnection.HasRemoteDescription(this);
     
     /// <summary>
     ///     Remote description of the peer connection.

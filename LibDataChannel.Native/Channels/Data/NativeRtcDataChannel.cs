@@ -22,7 +22,9 @@ public static class NativeRtcDataChannel
         Encoding.UTF8.GetBytes(label, utf8Label);
         utf8Label[^1] = 0;
 
-        return NativeRtc.CreateDataChannel(handle.Id, (IntPtr) Unsafe.AsPointer(ref utf8Label.GetPinnableReference()));
+        var ret = NativeRtc.CreateDataChannel(handle.Id, (IntPtr) Unsafe.AsPointer(ref utf8Label.GetPinnableReference()));
+        if (ret < 0) NativeRtc.ThrowException(ret);
+        return ret;
     }
     
     /// <summary>
@@ -39,7 +41,9 @@ public static class NativeRtcDataChannel
         Encoding.UTF8.GetBytes(label, utf8Label);
         utf8Label[^1] = 0;
 
-        return NativeRtc.CreateDataChannel(handle.Id, (IntPtr) Unsafe.AsPointer(ref utf8Label.GetPinnableReference()), (IntPtr) (&init));
+        var ret = NativeRtc.CreateDataChannel(handle.Id, (IntPtr) Unsafe.AsPointer(ref utf8Label.GetPinnableReference()), (IntPtr) (&init));
+        if (ret < 0) NativeRtc.ThrowException(ret);
+        return ret;
     }
 
     /// <summary>
@@ -70,6 +74,7 @@ public static class NativeRtcDataChannel
     {
         var buffer = stackalloc byte[StringBufferSize];
         var length = NativeRtc.GetDataChannelLabel(handle.Id, (IntPtr) buffer, StringBufferSize);
+        if (length <= 0) NativeRtc.ThrowException(length);
         
         return Marshal.PtrToStringAnsi((IntPtr) buffer, length - 1);
     }
@@ -83,6 +88,7 @@ public static class NativeRtcDataChannel
     {
         var buffer = stackalloc byte[StringBufferSize];
         var length = NativeRtc.GetDataChannelProtocol(handle.Id, (IntPtr) buffer, StringBufferSize);
+        if (length <= 0) NativeRtc.ThrowException(length);
         
         return Marshal.PtrToStringAnsi((IntPtr) buffer, length - 1);
     }
@@ -96,9 +102,7 @@ public static class NativeRtcDataChannel
     {
         NativeRtcReliability reliability;
         var errorCode = NativeRtc.GetDataChannelReliability(handle.Id, (IntPtr) (&reliability));
-        
-        if (errorCode != 0)
-            NativeRtc.ThrowException(errorCode);
+        if (errorCode != 0) NativeRtc.ThrowException(errorCode);
 
         return reliability;
     }

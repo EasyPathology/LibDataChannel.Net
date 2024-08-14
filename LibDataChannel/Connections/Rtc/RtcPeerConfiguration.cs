@@ -7,7 +7,7 @@ namespace LibDataChannel.Connections.Rtc;
 /// <summary>
 ///     Represents the initial configuration of a RTC peer connection.
 /// </summary>
-public class RtcPeerConfiguration
+public record RtcPeerConfiguration
 {
     /// <summary>
     ///     Ice servers to use. Each ice server must respect the following format: ("stun"|"turn"|"turns"):(login ":" password "@")(hostname ":" port)?(transport "=" ("udp"|"tcp"|"tls"))
