@@ -71,6 +71,9 @@ public unsafe class NativeRtc
     [DllImport(LibraryName, EntryPoint = "rtcSetDataChannelCallback", CallingConvention = CallingConvention.Cdecl)]
     public static extern int SetDataChannelCallback(int peerConnectionId, delegate* unmanaged[Cdecl]<int, int, IntPtr, void> callback);
     
+    [DllImport(LibraryName, EntryPoint = "rtcSetTrackCallback", CallingConvention = CallingConvention.Cdecl)]
+    public static extern int SetTrackCallback(int peerConnectionId, delegate* unmanaged[Cdecl]<int, int, IntPtr> callback);
+    
     [DllImport(LibraryName, EntryPoint = "rtcSetLocalDescription", CallingConvention = CallingConvention.Cdecl)]
     public static extern int SetLocalDescription(int peerConnectionId, IntPtr type);
     
@@ -160,6 +163,17 @@ public unsafe class NativeRtc
 	
 	[DllImport(LibraryName, EntryPoint = "rtcGetDataChannelReliability", CallingConvention = CallingConvention.Cdecl)]
 	public static extern int GetDataChannelReliability(int dataChannelId, IntPtr reliability);
+	
+	[DllImport(LibraryName, EntryPoint = "rtcAddTrack", CallingConvention = CallingConvention.Cdecl)]
+	public static extern int AddTrack(int dataChannelId, IntPtr mediaDescriptionSdp);
+	
+	[DllImport(LibraryName, EntryPoint = "rtcAddTrackEx", CallingConvention = CallingConvention.Cdecl)]
+	public static extern int AddTrackEx(int dataChannelId, IntPtr init);
+	
+	[DllImport(LibraryName, EntryPoint = "rtcDeleteTrack", CallingConvention = CallingConvention.Cdecl)]
+	public static extern int DeleteTrack(int trackId);
+	
+	
 	
 	// TODO: TRACK & MEDIA & WEBSOCKET
 	
