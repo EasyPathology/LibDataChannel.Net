@@ -36,6 +36,7 @@ public abstract class NativeRtcPeerConnectionHandle : NativeRtcHandle
     protected internal abstract void Internal_GatheringStateCallback(RtcGatheringState state);
     protected internal abstract void Internal_SignalingStateCallback(RtcSignalingState state);
     protected internal abstract void Internal_DataChannelCallback(int dataChannelId);
+    protected internal abstract void Internal_TrackCallback(int trackId);
     
-    public static NativeRtcPeerConnectionHandle FromHandle(IntPtr handle) => (NativeRtcPeerConnectionHandle) GCHandle.FromIntPtr(handle).Target;
+    public static NativeRtcPeerConnectionHandle FromHandle(IntPtr handle) => (NativeRtcPeerConnectionHandle?)GCHandle.FromIntPtr(handle).Target ?? throw new InvalidOperationException("Invalid handle");
 }

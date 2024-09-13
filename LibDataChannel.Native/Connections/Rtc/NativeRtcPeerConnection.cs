@@ -15,7 +15,7 @@ public static class NativeRtcPeerConnection
 {
     private const int StringBufferSize = 65535;
         
-    private static readonly IntPtr[] _descriptionTypeAnsiStringPointers =
+    private static readonly IntPtr[] DescriptionTypeAnsiStringPointers =
     {
         Marshal.StringToHGlobalAnsi("offer"),
         Marshal.StringToHGlobalAnsi("answer"),
@@ -23,7 +23,7 @@ public static class NativeRtcPeerConnection
         Marshal.StringToHGlobalAnsi("rollback"),
     };
 
-    private static readonly byte[][] _descriptionTypeAnsiStringBytes =
+    private static readonly byte[][] DescriptionTypeAnsiStringBytes =
     {
         new[] {(byte) 'o', (byte) 'f', (byte) 'f', (byte) 'e', (byte) 'r', (byte) '\0'},
         new[] {(byte) 'a', (byte) 'n', (byte) 's', (byte) 'w', (byte) 'e', (byte) 'r', (byte) '\0'},
@@ -51,6 +51,12 @@ public static class NativeRtcPeerConnection
     }
     
     /// <summary>
+    ///     Closes the peer connection from the native implementation.
+    /// </summary>
+    /// <param name="handle">the peer connection handle.</param>
+    public static void Close(NativeRtcPeerConnectionHandle handle) => NativeRtc.ClosePeerConnection(handle.Id);
+    
+    /// <summary>
     ///     Deletes the peer connection from the native implementation.
     /// </summary>
     /// <param name="handle">the peer connection handle.</param>
@@ -70,7 +76,7 @@ public static class NativeRtcPeerConnection
     /// <param name="type">the description type.</param>
     public static void SetLocalDescription(NativeRtcPeerConnectionHandle handle, SdpType type)
     {
-        int errorCode = NativeRtc.SetLocalDescription(handle.Id, _descriptionTypeAnsiStringPointers[(int) type]);
+        int errorCode = NativeRtc.SetLocalDescription(handle.Id, DescriptionTypeAnsiStringPointers[(int) type]);
         
         if (errorCode != 0)
         {
@@ -90,7 +96,7 @@ public static class NativeRtcPeerConnection
         
         try
         {
-            int errorCode = NativeRtc.SetRemoteDescription(handle.Id, stringToHGlobalAnsi, _descriptionTypeAnsiStringPointers[(int) sdp.Type]);
+            int errorCode = NativeRtc.SetRemoteDescription(handle.Id, stringToHGlobalAnsi, DescriptionTypeAnsiStringPointers[(int) sdp.Type]);
 
             if (errorCode != 0)
             {
@@ -257,6 +263,30 @@ public static class NativeRtcPeerConnection
         local = Marshal.PtrToStringAnsi((IntPtr) localBuffer, maxSize - 1);
         remote = Marshal.PtrToStringAnsi((IntPtr) remoteBuffer, maxSize - 1);
     }
+    
+    /// <summary>
+    ///     Retrieves the maximum message size for data channels on the peer connection as negotiated with the remote peer.
+    /// </summary>
+    /// <param name="handle">the peer connection handle.</param>
+    /// <returns>The maximum message size for data channels.</returns>
+    public static int GetRemoteMaxMessageSize(NativeRtcPeerConnectionHandle handle)
+    {
+        var ret = NativeRtc.GetRemoteMaxMessageSize(handle.Id);
+        if (ret < 0) NativeRtc.ThrowException(ret);
+        return ret;
+    }
+    
+    /// <summary>
+    ///     Retrieves the maximum message size for the channel.
+    /// </summary>
+    /// <param name="handle">the peer connection handle.</param>
+    /// <returns>The maximum message size for data channels.</returns>
+    public static int GetMaxMessageSize(NativeRtcPeerConnectionHandle handle)
+    {
+        var ret = NativeRtc.GetMaxMessageSize(handle.Id);
+        if (ret < 0) NativeRtc.ThrowException(ret);
+        return ret;
+    }
 
     #region Callback
     
@@ -267,12 +297,13 @@ public static class NativeRtcPeerConnection
     public static unsafe void AttachCallbacks(NativeRtcPeerConnectionHandle handle)
     {
         int id = handle.Id;
-        NativeRtc.SetLocalDescription(id, &RtcDescriptionCallback);
+        NativeRtc.SetLocalDescriptionCallback(id, &RtcDescriptionCallback);
         NativeRtc.SetLocalCandidateCallback(id, &LocalCandidateCallback);
         NativeRtc.SetStateChangeCallback(id, &StateChangeCallback);
         NativeRtc.SetGatheringStateChangeCallback(id, &GatheringStateCallback);
         NativeRtc.SetSignalingStateChangeCallback(id, &SignalingStateCallback);
         NativeRtc.SetDataChannelCallback(id, &DataChannelCallback);
+        NativeRtc.SetTrackCallback(id, &TrackCallback);
     }
     
     [UnmanagedCallersOnly(CallConvs = new[] {typeof(CallConvCdecl)})]
@@ -321,6 +352,13 @@ public static class NativeRtcPeerConnection
         NativeRtcPeerConnectionHandle.FromHandle(userPointer).Internal_DataChannelCallback(dataChannelId);
     }
     
+    [UnmanagedCallersOnly(CallConvs = new[] {typeof(CallConvCdecl)})]
+    private static void TrackCallback(int id, int trackId, IntPtr userPointer)
+    {
+        ThreadUtils.SetRtcThread();
+        NativeRtcPeerConnectionHandle.FromHandle(userPointer).Internal_TrackCallback(trackId);
+    }
+    
     #endregion
     
     /// <summary>
@@ -330,9 +368,9 @@ public static class NativeRtcPeerConnection
     /// <returns>the sdp type</returns>
     private static SdpType GetDescriptionTypeFromAnsi(ReadOnlySpan<byte> ansi)
     {
-        for (int i = 0; i < _descriptionTypeAnsiStringBytes.Length; i++)
+        for (int i = 0; i < DescriptionTypeAnsiStringBytes.Length; i++)
         {
-            if (ansi.SequenceEqual(_descriptionTypeAnsiStringBytes[i]))
+            if (ansi.SequenceEqual(DescriptionTypeAnsiStringBytes[i]))
             {
                 return (SdpType) i;
             }

@@ -8,7 +8,7 @@ namespace LibDataChannel.Channels.Data;
 public class RtcDataChannel : RtcChannel
 {
     /// <summary>
-    ///     THe parent peer connection.
+    ///     The parent peer connection.
     /// </summary>
     public RtcPeerConnection PeerConnection { get; }
     

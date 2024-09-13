@@ -2,12 +2,13 @@
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using LibDataChannel.Native.Channels.Track;
 using LibDataChannel.Native.Connections.Rtc;
 using LibDataChannel.Native.Exceptions;
 
 namespace LibDataChannel.Native;
 
-public unsafe class NativeRtc
+internal unsafe class NativeRtc
 {
 #if LINUX
     private const string LibraryName = "libdatachannel.so";
@@ -30,10 +31,13 @@ public unsafe class NativeRtc
 	    return NativeLibrary.Load(Path.Combine(AppContext.BaseDirectory, LibraryRelativePath, libraryName));
     }
 
-    internal const int ErrorInvalidArgument = -1;
-    internal const int ErrorFailure = -2;
-    internal const int ErrorNotAvailable = -3;
-    internal const int ErrorBufferTooSmall = -4;
+    internal enum Error
+	{
+		InvalidArgument = -1,
+		Failure = -2,
+		NotAvailable = -3,
+		BufferTooSmall = -4
+	}
 
     [DllImport(LibraryName, EntryPoint = "rtcInitLogger", CallingConvention = CallingConvention.Cdecl)]
     public static extern void InitLogger(RtcLogLevel level, delegate* unmanaged[Cdecl]<RtcLogLevel, IntPtr, void> callback);
@@ -50,11 +54,14 @@ public unsafe class NativeRtc
     [DllImport(LibraryName, EntryPoint = "rtcCreatePeerConnection", CallingConvention = CallingConvention.Cdecl)]
     public static extern int CreatePeerConnection(IntPtr configuration);
     
+    [DllImport(LibraryName, EntryPoint = "rtcClosePeerConnection", CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ClosePeerConnection(int peerConnectionId);
+    
     [DllImport(LibraryName, EntryPoint = "rtcDeletePeerConnection", CallingConvention = CallingConvention.Cdecl)]
     public static extern int DeletePeerConnection(int peerConnectionId);
 
     [DllImport(LibraryName, EntryPoint = "rtcSetLocalDescriptionCallback", CallingConvention = CallingConvention.Cdecl)]
-    public static extern int SetLocalDescription(int peerConnectionId, delegate* unmanaged[Cdecl]<int, IntPtr, IntPtr, IntPtr, void> callback);
+    public static extern int SetLocalDescriptionCallback(int peerConnectionId, delegate* unmanaged[Cdecl]<int, IntPtr, IntPtr, IntPtr, void> callback);
     
     [DllImport(LibraryName, EntryPoint = "rtcSetLocalCandidateCallback", CallingConvention = CallingConvention.Cdecl)]
     public static extern int SetLocalCandidateCallback(int peerConnectionId, delegate* unmanaged[Cdecl]<int, IntPtr, IntPtr, IntPtr, void> callback);
@@ -72,7 +79,7 @@ public unsafe class NativeRtc
     public static extern int SetDataChannelCallback(int peerConnectionId, delegate* unmanaged[Cdecl]<int, int, IntPtr, void> callback);
     
     [DllImport(LibraryName, EntryPoint = "rtcSetTrackCallback", CallingConvention = CallingConvention.Cdecl)]
-    public static extern int SetTrackCallback(int peerConnectionId, delegate* unmanaged[Cdecl]<int, int, IntPtr> callback);
+    public static extern int SetTrackCallback(int peerConnectionId, delegate* unmanaged[Cdecl]<int, int, IntPtr, void> callback);
     
     [DllImport(LibraryName, EntryPoint = "rtcSetLocalDescription", CallingConvention = CallingConvention.Cdecl)]
     public static extern int SetLocalDescription(int peerConnectionId, IntPtr type);
@@ -104,6 +111,9 @@ public unsafe class NativeRtc
     [DllImport(LibraryName, EntryPoint = "rtcGetSelectedCandidatePair", CallingConvention = CallingConvention.Cdecl)]
     public static extern int GetSelectedCandidatePair(int peerConnectionId, IntPtr local, int localSize, IntPtr remote, int remoteSize);
     
+    [DllImport(LibraryName, EntryPoint = "rtcGetRemoteMaxMessageSize", CallingConvention = CallingConvention.Cdecl)]
+    public static extern int GetRemoteMaxMessageSize(int peerConnectionId);
+    
     [DllImport(LibraryName, EntryPoint = "rtcSetOpenCallback", CallingConvention = CallingConvention.Cdecl)]
     public static extern int SetOpenCallback(int channelId, delegate* unmanaged[Cdecl]<int, IntPtr, void> callback);
     
@@ -122,14 +132,23 @@ public unsafe class NativeRtc
     [DllImport(LibraryName, EntryPoint = "rtcSetAvailableCallback", CallingConvention = CallingConvention.Cdecl)]
     public static extern int SetAvailableCallback(int channelId, delegate* unmanaged[Cdecl]<int, IntPtr, void> callback);
     
+    [DllImport(LibraryName, EntryPoint = "rtcSendMessage", CallingConvention = CallingConvention.Cdecl)]
+    public static extern int SendMessage(int channelId, IntPtr message, int size);
+    
+    [DllImport(LibraryName, EntryPoint = "rtcClose", CallingConvention = CallingConvention.Cdecl)]
+    public static extern int Close(int channelId);
+    
+    [DllImport(LibraryName, EntryPoint = "rtcDelete", CallingConvention = CallingConvention.Cdecl)]
+    public static extern int Delete(int channelId);
+    
     [DllImport(LibraryName, EntryPoint = "rtcIsOpen", CallingConvention = CallingConvention.Cdecl)]
     public static extern bool IsOpen(int channelId);
     
     [DllImport(LibraryName, EntryPoint = "rtcIsClosed", CallingConvention = CallingConvention.Cdecl)]
     public static extern bool IsClosed(int channelId);
     
-    [DllImport(LibraryName, EntryPoint = "rtcSendMessage", CallingConvention = CallingConvention.Cdecl)]
-    public static extern int SendMessage(int channelId, IntPtr message, int size);
+    [DllImport(LibraryName, EntryPoint = "rtcGetMaxMessageSize", CallingConvention = CallingConvention.Cdecl)]
+    public static extern int GetMaxMessageSize(int peerConnectionId);
     
     [DllImport(LibraryName, EntryPoint = "rtcGetBufferedAmount", CallingConvention = CallingConvention.Cdecl)]
     public static extern int GetBufferedAmount(int channelId);
@@ -173,20 +192,27 @@ public unsafe class NativeRtc
 	[DllImport(LibraryName, EntryPoint = "rtcDeleteTrack", CallingConvention = CallingConvention.Cdecl)]
 	public static extern int DeleteTrack(int trackId);
 	
+	[DllImport(LibraryName, EntryPoint = "rtcGetTrackDescription", CallingConvention = CallingConvention.Cdecl)]
+	public static extern int GetTrackDescription(int trackId, IntPtr buffer, int size);
 	
+	[DllImport(LibraryName, EntryPoint = "rtcGetTrackMid", CallingConvention = CallingConvention.Cdecl)]
+	public static extern int GetTrackMediaIdentifier(int trackId, IntPtr buffer, int size);
 	
-	// TODO: TRACK & MEDIA & WEBSOCKET
+	[DllImport(LibraryName, EntryPoint = "rtcGetTrackDirection", CallingConvention = CallingConvention.Cdecl)]
+	public static extern int GetTrackDirection(int trackId, RtcDirection* direction);
+	
+	// TODO: MEDIA & WEBSOCKET
 	
 	[DoesNotReturn]
 	[MethodImpl(MethodImplOptions.NoInlining)]
-	internal static void ThrowException(int errorCode)
+	public static void ThrowException(int errorCode)
 	{
-		throw errorCode switch
+		throw (Error)errorCode switch
 		{
-			ErrorInvalidArgument => new RtcArgumentException(),
-			ErrorFailure => new RtcFailureException(),
-			ErrorNotAvailable => new RtcNotAvailableException(),
-			ErrorBufferTooSmall => new RtcBufferTooSmallException(),
+			Error.InvalidArgument => new RtcArgumentException(),
+			Error.Failure => new RtcFailureException(),
+			Error.NotAvailable => new RtcNotAvailableException(),
+			Error.BufferTooSmall => new RtcBufferTooSmallException(),
 			_ => new RtcException($"RTC error code: {errorCode}"),
 		};
 	}

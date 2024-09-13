@@ -75,7 +75,7 @@ public static class NativeRtcChannel
 
             if (errorCode < 0)
             {
-                if (errorCode == NativeRtc.ErrorNotAvailable)
+                if (errorCode == (int)NativeRtc.Error.NotAvailable)
                 {
                     length = 0;
                     return false;

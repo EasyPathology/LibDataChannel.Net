@@ -1,5 +1,4 @@
 ﻿using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using System.Text;
 using LibDataChannel.Native.Connections.Rtc;
 
@@ -7,8 +6,6 @@ namespace LibDataChannel.Native.Channels.Data;
 
 public static class NativeRtcDataChannel
 {
-    private const int StringBufferSize = 8192;
-    
     /// <summary>
     ///     Creates a new native RTCDataChannel object with the given label and default options.
     /// </summary>
@@ -70,13 +67,9 @@ public static class NativeRtcDataChannel
     /// </summary>
     /// <param name="handle">the handle.</param>
     /// <returns>the label.</returns>
-    public static unsafe string GetLabel(NativeRtcChannelHandle handle)
+    public static string GetLabel(NativeRtcChannelHandle handle)
     {
-        var buffer = stackalloc byte[StringBufferSize];
-        var length = NativeRtc.GetDataChannelLabel(handle.Id, (IntPtr) buffer, StringBufferSize);
-        if (length <= 0) NativeRtc.ThrowException(length);
-        
-        return Marshal.PtrToStringAnsi((IntPtr) buffer, length - 1);
+        return MarshalUtils.GetString(handle.Id, NativeRtc.GetDataChannelLabel);
     }
     
     /// <summary>
@@ -84,13 +77,9 @@ public static class NativeRtcDataChannel
     /// </summary>
     /// <param name="handle">the handle.</param>
     /// <returns>the sub-protocol name.</returns>
-    public static unsafe string GetProtocol(NativeRtcChannelHandle handle)
+    public static string GetProtocol(NativeRtcChannelHandle handle)
     {
-        var buffer = stackalloc byte[StringBufferSize];
-        var length = NativeRtc.GetDataChannelProtocol(handle.Id, (IntPtr) buffer, StringBufferSize);
-        if (length <= 0) NativeRtc.ThrowException(length);
-        
-        return Marshal.PtrToStringAnsi((IntPtr) buffer, length - 1);
+        return MarshalUtils.GetString(handle.Id, NativeRtc.GetDataChannelProtocol);
     }
 
     /// <summary>

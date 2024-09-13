@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Net;
 using LibDataChannel.Channels.Data;
+using LibDataChannel.Channels.Track;
 using LibDataChannel.Native.Connections.Rtc;
 using LibDataChannel.Native.Sdp;
 
@@ -13,6 +14,7 @@ namespace LibDataChannel.Connections.Rtc;
 public class RtcPeerConnection : NativeRtcPeerConnectionHandle
 {
     public delegate void DataChannelCallback(RtcDataChannel channel);
+    public delegate void TrackCallback(RtcTrack track);
     public delegate void LocalDescriptionCallback(SdpMessage sdp);
     public delegate void LocalCandidateCallback(RtcIceCandidate candidate);
     public delegate void StateChangeCallback(RtcState state);
@@ -20,6 +22,7 @@ public class RtcPeerConnection : NativeRtcPeerConnectionHandle
     public delegate void SignalingStateChangeCallback(RtcSignalingState state);
     
     private readonly List<RtcDataChannel> _dataChannels;
+    private readonly List<RtcTrack> _tracks;
 
     /// <summary>
     ///     State of the peer connection.
@@ -49,11 +52,40 @@ public class RtcPeerConnection : NativeRtcPeerConnectionHandle
             }
         }
     }
+    
+    /// <summary>
+    ///    List of tracks created by this peer connection. Thread safe.
+    /// </summary>
+    public IReadOnlyList<RtcTrack> Tracks
+    {
+        get
+        {
+            lock (SyncRoot)
+            {
+                return _tracks.ToList();
+            }
+        }
+    }
+    
+    /// <summary>
+    ///     Retrieves the maximum message size for data channels on the peer connection as negotiated with the remote peer.
+    /// </summary>
+    public int RemoteMaxMessageSize => NativeRtcPeerConnection.GetRemoteMaxMessageSize(this);
+    
+    /// <summary>
+    ///     Retrieves the maximum message size for the channel.
+    /// </summary>
+    public int MaxMessageSize => NativeRtcPeerConnection.GetMaxMessageSize(this);
 
     /// <summary>
     ///     Callback for when a new data channel is created by the host.
     /// </summary>
     public event DataChannelCallback? OnDataChannel;
+
+    /// <summary>
+    ///     Callback for when a new track is created by the host.
+    /// </summary>
+    public event TrackCallback? OnTrack;
     
     /// <summary>
     ///     Callback for when the local description is set.
@@ -88,6 +120,7 @@ public class RtcPeerConnection : NativeRtcPeerConnectionHandle
         : base(NativeRtcPeerConnection.Create(configuration != null ? configuration.AllocNative() : default))
     {
         _dataChannels = new List<RtcDataChannel>();
+        _tracks = new List<RtcTrack>();
     }
 
     protected override void OnDispose()
@@ -169,6 +202,20 @@ public class RtcPeerConnection : NativeRtcPeerConnectionHandle
     public RtcDataChannel CreateDataChannel(string label, RtcDataChannelInit configuration) => new RtcDataChannel(this, label, configuration);
 
     /// <summary>
+    ///    Adds a new track to the peer connection.
+    /// </summary>
+    /// <param name="mediaDescriptionSdp">the media Description sdp.</param>
+    /// <returns></returns>
+    public RtcTrack AddTrack(string mediaDescriptionSdp) => new RtcTrack(this, mediaDescriptionSdp);
+    
+    /// <summary>
+    ///   Adds a new track to the peer connection.
+    /// </summary>
+    /// <param name="init">the options.</param>
+    /// <returns></returns>
+    public RtcTrack AddTrack(RtcTrackInit init) => new RtcTrack(this, init);
+    
+    /// <summary>
     ///     Creates a new offer to be sent to the remote peer.
     /// </summary>
     public void CreateOffer() => NativeRtcPeerConnection.SetLocalDescription(this, SdpType.Offer);
@@ -178,6 +225,11 @@ public class RtcPeerConnection : NativeRtcPeerConnectionHandle
     /// </summary>
     public void CreateAnswer() => NativeRtcPeerConnection.SetLocalDescription(this, SdpType.Answer);
 
+    /// <summary>
+    ///   Closes the peer connection.
+    /// </summary>
+    public void Close() => NativeRtcPeerConnection.Close(this);
+    
     protected override void Internal_OnLocalDescription(SdpMessage description)
     {
         OnLocalDescription?.Invoke(description);
@@ -248,6 +300,21 @@ public class RtcPeerConnection : NativeRtcPeerConnectionHandle
         OnDataChannel?.Invoke(dataChannel);
     }
 
+    protected override void Internal_TrackCallback(int trackId)
+    {
+        RtcTrack track;
+        
+        lock (SyncRoot)
+        {
+            if (Disposed)
+                return;
+
+            track = new RtcTrack(this, trackId);
+        }
+        
+        OnTrack?.Invoke(track);
+    }
+
     internal void OnDataChannelClosed(RtcDataChannel channel)
     {
         lock (SyncRoot)
@@ -267,6 +334,28 @@ public class RtcPeerConnection : NativeRtcPeerConnectionHandle
                 return;
             
             _dataChannels.Add(channel);
+        }
+    }
+
+    internal void OnTrackClosed(RtcTrack track)
+    {
+        lock (SyncRoot)
+        {
+            if (Disposed)
+                return;
+            
+            _tracks.Remove(track);
+        }
+    }
+    
+    internal void OnTrackAdded(RtcTrack track)
+    {
+        lock (SyncRoot)
+        {
+            if (Disposed)
+                return;
+            
+            _tracks.Add(track);
         }
     }
 }

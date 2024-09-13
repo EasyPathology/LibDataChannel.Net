@@ -6,7 +6,7 @@ public abstract class RtcChannel(int id) : NativeRtcChannelHandle(id)
 {
     public delegate void OpenCallback();
     public delegate void ClosedCallback();
-    public delegate void ErrorCallback(string error);
+    public delegate void ErrorCallback(string? error);
     public delegate void MessageCallback(ReadOnlySpan<byte> message);
     public delegate void BufferedAmountLowCallback();
     public delegate void AvailableCallback();
@@ -160,7 +160,7 @@ public abstract class RtcChannel(int id) : NativeRtcChannelHandle(id)
         OnClosed?.Invoke();
     }
     
-    protected override void Internal_OnError(string error)
+    protected override void Internal_OnError(string? error)
     {
         lock (SyncRoot)
         {
