@@ -19,11 +19,9 @@ public static class NativeRtcDataChannel
         Encoding.UTF8.GetBytes(label, utf8Label);
         utf8Label[^1] = 0;
 
-        var ret = NativeRtc.CreateDataChannel(handle.Id, (IntPtr) Unsafe.AsPointer(ref utf8Label.GetPinnableReference()));
-        if (ret < 0) NativeRtc.ThrowException(ret);
-        return ret;
+        return NativeRtc.CreateDataChannel(handle.Id, (IntPtr)Unsafe.AsPointer(ref utf8Label.GetPinnableReference())).ThrowIfError();
     }
-    
+
     /// <summary>
     ///     Creates a new native RTCDataChannel object with the given label and default options.
     /// </summary>
@@ -33,31 +31,40 @@ public static class NativeRtcDataChannel
     /// <returns>the data channel id.</returns>
     public static unsafe int Create(NativeRtcPeerConnectionHandle handle, string label, NativeRtcDataChannelInit init)
     {
-        ArgumentNullException.ThrowIfNull(label, nameof(label));
-        Span<byte> utf8Label = stackalloc byte[Encoding.UTF8.GetByteCount(label) + 1];
-        Encoding.UTF8.GetBytes(label, utf8Label);
-        utf8Label[^1] = 0;
+        try
+        {
+            ArgumentNullException.ThrowIfNull(label, nameof(label));
+            Span<byte> utf8Label = stackalloc byte[Encoding.UTF8.GetByteCount(label) + 1];
+            Encoding.UTF8.GetBytes(label, utf8Label);
+            utf8Label[^1] = 0;
 
-        var ret = NativeRtc.CreateDataChannel(handle.Id, (IntPtr) Unsafe.AsPointer(ref utf8Label.GetPinnableReference()), (IntPtr) (&init));
-        if (ret < 0) NativeRtc.ThrowException(ret);
-        return ret;
+            return NativeRtc.CreateDataChannelEx(
+                handle.Id,
+                (IntPtr)Unsafe.AsPointer(ref utf8Label.GetPinnableReference()),
+                (IntPtr)(&init)
+            ).ThrowIfError();
+        }
+        finally
+        {
+            init.Free();
+        }
     }
 
     /// <summary>
     ///     Deletes the native RTCDataChannel object.
     /// </summary>
     /// <param name="handle">the handle.</param>
-    public static void Delete(NativeRtcChannelHandle handle)
+    public static void Delete(RtcDataChannel handle)
     {
         NativeRtc.DeleteDataChannel(handle.Id);
     }
-    
+
     /// <summary>
     ///     Gets the stream id.
     /// </summary>
     /// <param name="handle">the handle.</param>
     /// <returns>the stream id.</returns>
-    public static int GetStream(NativeRtcChannelHandle handle)
+    public static int GetStream(RtcDataChannel handle)
     {
         return NativeRtc.GetDataChannelStream(handle.Id);
     }
@@ -67,17 +74,17 @@ public static class NativeRtcDataChannel
     /// </summary>
     /// <param name="handle">the handle.</param>
     /// <returns>the label.</returns>
-    public static string GetLabel(NativeRtcChannelHandle handle)
+    public static string GetLabel(RtcDataChannel handle)
     {
         return MarshalUtils.GetString(handle.Id, NativeRtc.GetDataChannelLabel);
     }
-    
+
     /// <summary>
     ///     Gets the channel sub-protocol.
     /// </summary>
     /// <param name="handle">the handle.</param>
     /// <returns>the sub-protocol name.</returns>
-    public static string GetProtocol(NativeRtcChannelHandle handle)
+    public static string GetProtocol(RtcDataChannel handle)
     {
         return MarshalUtils.GetString(handle.Id, NativeRtc.GetDataChannelProtocol);
     }
@@ -87,12 +94,10 @@ public static class NativeRtcDataChannel
     /// </summary>
     /// <param name="handle">the handle.</param>
     /// <returns>the reliability options.</returns>
-    public static unsafe NativeRtcReliability GetReliability(NativeRtcChannelHandle handle)
+    public static unsafe NativeRtcReliability GetReliability(RtcDataChannel handle)
     {
         NativeRtcReliability reliability;
-        var errorCode = NativeRtc.GetDataChannelReliability(handle.Id, (IntPtr) (&reliability));
-        if (errorCode != 0) NativeRtc.ThrowException(errorCode);
-
+        NativeRtc.GetDataChannelReliability(handle.Id, (IntPtr)(&reliability)).ThrowIfError();
         return reliability;
     }
 }

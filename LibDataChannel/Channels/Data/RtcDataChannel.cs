@@ -5,7 +5,7 @@ using LibDataChannel.Native.Channels.Data;
 namespace LibDataChannel.Channels.Data;
 
 [DebuggerDisplay("RtcDataChannel({_label})")]
-public class RtcDataChannel : RtcChannel
+public class RtcDataChannel : Native.Channels.RtcDataChannel
 {
     /// <summary>
     ///     The parent peer connection.

@@ -1,45 +1,58 @@
-﻿namespace LibDataChannel.Channels;
+﻿using System.Runtime.InteropServices;
 
-using LibDataChannel.Native.Channels;
+namespace LibDataChannel.Native.Channels;
 
-public abstract class RtcChannel(int id) : NativeRtcChannelHandle(id)
+/// <summary>
+///     Handle for a data channel.
+/// </summary>
+public abstract class RtcChannel : NativeRtcHandle
 {
+    /// <summary>
+    ///     The channel id.
+    /// </summary>
+    public int Id { get; }
+
     public delegate void OpenCallback();
+
     public delegate void ClosedCallback();
+
     public delegate void ErrorCallback(string? error);
+
     public delegate void MessageCallback(ReadOnlySpan<byte> message);
+
     public delegate void BufferedAmountLowCallback();
+
     public delegate void AvailableCallback();
 
     private bool _isMessageEventSet;
-    
+
     private event MessageCallback? OnMessagePrivateCallback;
-    
+
     /// <summary>
     ///     Called when the channel is opened.
     /// </summary>
     public event OpenCallback? OnOpen;
-    
+
     /// <summary>
     ///     Called when the channel is closed.
     /// </summary>
     public event ClosedCallback? OnClosed;
-    
+
     /// <summary>
     ///     Called when an error occurs.
     /// </summary>
     public event ErrorCallback? OnError;
-    
+
     /// <summary>
     ///     Called when the buffered amount of data is low.
     /// </summary>
     public event BufferedAmountLowCallback? OnBufferedAmountLow;
-    
+
     /// <summary>
     ///     Called when data is available.
     /// </summary>
     public event AvailableCallback? OnAvailable;
-    
+
     /// <summary>
     ///     Called when a message is received.
     /// </summary>
@@ -55,13 +68,13 @@ public abstract class RtcChannel(int id) : NativeRtcChannelHandle(id)
                     NativeRtcChannel.AttachMessageCallback(this);
                 }
             }
-            
+
             OnMessagePrivateCallback += value;
         }
         remove
         {
             OnMessagePrivateCallback -= value;
-            
+
             lock (SyncRoot)
             {
                 if (!Disposed && _isMessageEventSet && OnMessagePrivateCallback == null)
@@ -82,15 +95,13 @@ public abstract class RtcChannel(int id) : NativeRtcChannelHandle(id)
                 NativeRtcChannel.DetachMessageCallback(this);
             }
         }
-        
-        base.OnDispose();
     }
-    
+
     /// <summary>
     ///     Gets whether the channel is open.
     /// </summary>
     public bool IsOpen => NativeRtcChannel.IsOpen(this);
-    
+
     /// <summary>
     ///     Gets whether the channel is closed.
     /// </summary>
@@ -100,7 +111,7 @@ public abstract class RtcChannel(int id) : NativeRtcChannelHandle(id)
     ///     Gets the buffered amount of data waiting to be sent.
     /// </summary>
     public int BufferedAmount => NativeRtcChannel.GetBufferedAmount(this);
-    
+
     /// <summary>
     ///     Gets the available amount of data waiting to be received.
     /// </summary>
@@ -113,13 +124,13 @@ public abstract class RtcChannel(int id) : NativeRtcChannelHandle(id)
     {
         set => NativeRtcChannel.SetBufferedAmountLowThreshold(this, value);
     }
-    
+
     /// <summary>
     ///     Sends the given message.
     /// </summary>
     /// <param name="message">the message to send.</param>
     public void SendMessage(ReadOnlySpan<byte> message) => NativeRtcChannel.SendMessage(this, message);
-    
+
     /// <summary>
     ///     Tries to receive a buffered message.
     /// </summary>
@@ -132,75 +143,86 @@ public abstract class RtcChannel(int id) : NativeRtcChannelHandle(id)
         lock (SyncRoot)
         {
             if (_isMessageEventSet)
-                throw new InvalidOperationException("Cannot call TryReceiveMessage when OnMessage is set.");   
+                throw new InvalidOperationException("Cannot call TryReceiveMessage when OnMessage is set.");
         }
 
         return NativeRtcChannel.TryReceiveMessage(this, buffer, out length);
     }
 
-    protected override void Internal_OnOpen()
+    protected RtcChannel(int id)
+    {
+        Id = id;
+
+        NativeRtcChannel.SetHandle(this, HandlePtr);
+        NativeRtcChannel.AttachCallbacks(this);
+    }
+
+    internal void InternalHandleOnOpen()
     {
         lock (SyncRoot)
         {
             if (Disposed)
                 return;
         }
-        
+
         OnOpen?.Invoke();
     }
 
-    protected override void Internal_OnClosed()
+    internal void InternalHandleOnClosed()
     {
         lock (SyncRoot)
         {
             if (Disposed)
                 return;
         }
-        
+
         OnClosed?.Invoke();
     }
-    
-    protected override void Internal_OnError(string? error)
+
+    internal void InternalHandleOnError(string? error)
     {
         lock (SyncRoot)
         {
             if (Disposed)
                 return;
         }
-        
+
         OnError?.Invoke(error);
     }
 
-    protected override void Internal_OnMessage(ReadOnlySpan<byte> message)
+    internal void InternalHandleOnMessage(ReadOnlySpan<byte> message)
     {
         lock (SyncRoot)
         {
             if (Disposed)
                 return;
         }
-        
+
         OnMessagePrivateCallback?.Invoke(message);
     }
 
-    protected override void Internal_OnBufferedAmountLow()
+    internal void InternalHandleOnBufferedAmountLow()
     {
         lock (SyncRoot)
         {
             if (Disposed)
                 return;
         }
-        
+
         OnBufferedAmountLow?.Invoke();
     }
 
-    protected override void Internal_OnAvailable()
+    internal void InternalHandleOnAvailable()
     {
         lock (SyncRoot)
         {
             if (Disposed)
                 return;
         }
-        
+
         OnAvailable?.Invoke();
     }
+
+    internal static RtcChannel FromHandle(IntPtr ptr) =>
+        GCHandle.FromIntPtr(ptr).Target as RtcChannel ?? throw new InvalidOperationException("Invalid handle");
 }

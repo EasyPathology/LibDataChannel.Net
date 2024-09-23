@@ -3,7 +3,7 @@ using LibDataChannel.Native.Channels.Track;
 
 namespace LibDataChannel.Channels.Track;
 
-public class RtcTrack : RtcChannel
+public class RtcTrack : Native.Channels.RtcTrack
 {
     /// <summary>
     ///     The parent peer connection.
