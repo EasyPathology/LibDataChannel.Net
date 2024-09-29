@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using System.Reflection;
 using System.Runtime.InteropServices;
 using LibDataChannel.Native.Channels.Track;
 using LibDataChannel.Native.Connections.Rtc;
@@ -9,25 +8,34 @@ namespace LibDataChannel.Native;
 
 internal static unsafe class NativeRtc
 {
-#if LINUX
-    private const string LibraryName = "libdatachannel.so";
-    private const string LibRelativePath = @"runtimes\linux-x64\native\";
-#elif OSX
-    private const string LibraryName = "libdatachannel.dylib";
-    private const string LibRelativePath = @"runtimes\osx-x64\native\";
-#else
-    private const string LibraryName = "datachannel.dll";
-    private const string LibraryRelativePath = @"runtimes\win-x64\native\";
-#endif
+    private const string LibraryName = "libdatachannel";
+    
+    private static string LibraryPath
+    {
+	    get
+	    {
+		    if (libraryPath != null) return libraryPath;
+            
+		    var platform = Environment.OSVersion.Platform switch
+		    {
+			    PlatformID.Win32NT => "win",
+			    PlatformID.Unix => "linux",
+			    PlatformID.MacOSX => "osx",
+			    _ => throw new PlatformNotSupportedException()
+		    };
+		    var arch = Environment.Is64BitProcess ? "x64" : "x86";
+		    libraryPath = Path.Combine(AppContext.BaseDirectory, "runtimes", $"{platform}-{arch}", "native");
+            
+		    return libraryPath;
+	    }
+    }
+
+    private static string? libraryPath;
 
     static NativeRtc()
     {
-        NativeLibrary.SetDllImportResolver(typeof(NativeRtc).Assembly, ImportResolver);
-    }
-
-    private static IntPtr ImportResolver(string libraryName, Assembly assembly, DllImportSearchPath? searchPath)
-    {
-        return NativeLibrary.Load(Path.Combine(AppContext.BaseDirectory, LibraryRelativePath, libraryName));
+	    NativeLibrary.SetDllImportResolver(typeof(NativeRtc).Assembly, static (libraryName, _, _) =>
+		    NativeLibrary.Load(Path.Combine(LibraryPath, libraryName)));
     }
 
     internal enum Error

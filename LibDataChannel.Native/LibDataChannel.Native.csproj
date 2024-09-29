@@ -6,6 +6,10 @@
         <Nullable>enable</Nullable>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 
+        <IsWindows Condition="'$(RuntimeIdentifier)'=='win-x64'">true</IsWindows>
+        <IsOSX Condition="'$(RuntimeIdentifier)'=='osx-x64'">true</IsOSX>
+        <IsLinux Condition="'$(RuntimeIdentifier)'=='linux-x64'">true</IsLinux>
+
         <Title>LibDataChannel.Net.Native</Title>
         <Authors>Mimi8298</Authors>
         <Description>High-Performance C# bindings for libdatachannel (Windows, Linux and macOS). Only WebRTC with DataChannel is supported currently.</Description>
@@ -17,8 +21,8 @@
         <AssemblyVersion>0.0.1</AssemblyVersion>
     </PropertyGroup>
 
-    <ItemGroup Condition="'$(OS)' == 'Windows_NT'">
-        <None Update="runtimes\win-x64\native\datachannel.dll">
+    <ItemGroup Condition="'$(IsWindows)'=='true'">
+        <None Update="runtimes\win-x64\native\libdatachannel.dll">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
         <None Update="runtimes\win-x64\native\libcrypto-3-x64.dll">
@@ -29,13 +33,13 @@
         </None>
     </ItemGroup>
 
-    <ItemGroup Condition="'$(OS)' == 'Unix'">
+    <ItemGroup Condition="'$(IsOSX)'=='true'">
         <None Update="runtimes\osx-x64\native\libdatachannel.dylib">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
     </ItemGroup>
 
-    <ItemGroup Condition="'$(OS)' == 'Linux'">
+    <ItemGroup Condition="'$(IsLinux)'=='true'">
         <None Update="runtimes\linux-x64\native\libdatachannel.so">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
