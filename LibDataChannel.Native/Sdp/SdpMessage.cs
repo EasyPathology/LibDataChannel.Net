@@ -3,7 +3,6 @@ using System.Text.Json.Serialization;
 
 namespace LibDataChannel.Native.Sdp;
 
-[Serializable]
 public readonly struct SdpMessage(SdpType type, string content)
 {
     public SdpType Type { get; init; } = type;
