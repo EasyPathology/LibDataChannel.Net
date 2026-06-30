@@ -25,14 +25,20 @@
         <AssemblyVersion>0.0.1</AssemblyVersion>
     </PropertyGroup>
 
-    <ItemGroup Condition="'$(IsWindows)'=='true'">
-        <None Update="runtimes\win-x64\native\libdatachannel.dll">
+    <ItemGroup>
+        <None Include="runtimes\win-x64\native\libdatachannel.dll">
+            <Pack>true</Pack>
+            <PackagePath>runtimes\win-x64\native\</PackagePath>
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
-        <None Update="runtimes\win-x64\native\libcrypto-3-x64.dll">
+        <None Include="runtimes\win-x64\native\libcrypto-3-x64.dll">
+            <Pack>true</Pack>
+            <PackagePath>runtimes\win-x64\native\</PackagePath>
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
-        <None Update="runtimes\win-x64\native\libssl-3-x64.dll">
+        <None Include="runtimes\win-x64\native\libssl-3-x64.dll">
+            <Pack>true</Pack>
+            <PackagePath>runtimes\win-x64\native\</PackagePath>
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
     </ItemGroup>
@@ -48,4 +54,5 @@
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
     </ItemGroup>
+
 </Project>

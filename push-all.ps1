@@ -76,7 +76,7 @@ New-Item -ItemType Directory -Path (Split-Path -Parent $configFile) -Force | Out
 foreach ($project in $projects) {
     $pkgDir = Join-Path $repoRoot "artifacts"
     $pkg = Get-ChildItem -Path $pkgDir -Filter "EasyPathology.External.$project.*.nupkg" |
-        Where-Object { $_.Name -notmatch "\.symbols\.nupkg$" } |
+        Where-Object { $_.BaseName -match "^EasyPathology\.External\.$project\.\d" -and $_.Name -notmatch "\.symbols\.nupkg$" } |
         Sort-Object LastWriteTime -Descending |
         Select-Object -First 1
 
