@@ -1,0 +1,4 @@
+[submodule "Key"]
+	path = Key
+	url = https://github.com/EasyPathology/EasyPathology.Key
+	branch = cicd

@@ -1,0 +1,10 @@
+<Project>
+  <PropertyGroup>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <Platforms>AnyCPU</Platforms>
+  </PropertyGroup>
+
+  <Import Project="$(MSBuildThisFileDirectory)Directory.Packaging.props" Condition="Exists('$(MSBuildThisFileDirectory)Directory.Packaging.props')" />
+</Project>

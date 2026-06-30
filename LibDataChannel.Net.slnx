@@ -1,0 +1,13 @@
+<Solution>
+  <Folder Name="/_/">
+    <File Path=".gitignore" />
+    <File Path=".gitmodules" />
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Packaging.props" />
+    <File Path="NuGet.Config" />
+  </Folder>
+  <Project Path="LibDataChannel.Benchmark/LibDataChannel.Benchmark.csproj" />
+  <Project Path="LibDataChannel.Native/LibDataChannel.Native.csproj" />
+  <Project Path="LibDataChannel.Test/LibDataChannel.Test.csproj" />
+  <Project Path="LibDataChannel/LibDataChannel.csproj" />
+</Solution>

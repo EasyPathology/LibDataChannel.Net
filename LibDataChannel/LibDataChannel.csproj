@@ -7,8 +7,9 @@
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <PackageVersion>0.0.1</PackageVersion>
-        
-        <Title>LibDataChannel.Net</Title>
+
+        <PackageId>EasyPathology.External.LibDataChannel</PackageId>
+        <Title>EasyPathology.External.LibDataChannel</Title>
         <Authors>Mimi8298</Authors>
         <Description>High-Performance C# bindings for libdatachannel (Windows, Linux and macOS). Only WebRTC with DataChannel is supported currently.</Description>
         <Copyright>GNU Lesser General Public License</Copyright>
@@ -20,7 +21,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\LibDataChannel.Native\LibDataChannel.Native.csproj" />
+        <PackageReference Include="EasyPathology.External.LibDataChannel.Native" Version="0.0.1" />
     </ItemGroup>
 
 </Project>

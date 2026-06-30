@@ -5,12 +5,16 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 
         <IsWindows Condition="'$(RuntimeIdentifier)'=='win-x64'">true</IsWindows>
         <IsOSX Condition="'$(RuntimeIdentifier)'=='osx-x64'">true</IsOSX>
         <IsLinux Condition="'$(RuntimeIdentifier)'=='linux-x64'">true</IsLinux>
-
-        <Title>LibDataChannel.Net.Native</Title>
+        
+        <PackageId>EasyPathology.External.LibDataChannel.Native</PackageId>
+        <PackageVersion>0.0.1</PackageVersion>
+        <Title>EasyPathology.External.LibDataChannel.Native</Title>
+        
         <Authors>Mimi8298</Authors>
         <Description>High-Performance C# bindings for libdatachannel (Windows, Linux and macOS). Only WebRTC with DataChannel is supported currently.</Description>
         <Copyright>GNU Lesser General Public License</Copyright>
