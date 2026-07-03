@@ -10,12 +10,23 @@ internal static unsafe class NativeRtc
 {
     private const string LibraryName = "libdatachannel";
     
-    private static string LibraryPath
+    static NativeRtc()
     {
-	    get
+	    NativeLibrary.SetDllImportResolver(typeof(NativeRtc).Assembly, static (libraryName, _, _) =>
 	    {
-		    if (libraryPath != null) return libraryPath;
-            
+		    var suffix = Environment.OSVersion.Platform switch
+		    {
+			    PlatformID.Win32NT => "dll",
+			    PlatformID.Unix => "so",
+			    PlatformID.MacOSX => "dylib",
+			    _ => throw new PlatformNotSupportedException()
+		    };
+
+		    // Prefer the application root (where our build/publish places native DLLs).
+		    var rootPath = Path.Combine(AppContext.BaseDirectory, $"{libraryName}.{suffix}");
+		    if (File.Exists(rootPath)) return NativeLibrary.Load(rootPath);
+
+		    // Fallback to the standard NuGet runtimes folder layout.
 		    var platform = Environment.OSVersion.Platform switch
 		    {
 			    PlatformID.Win32NT => "win",
@@ -24,18 +35,9 @@ internal static unsafe class NativeRtc
 			    _ => throw new PlatformNotSupportedException()
 		    };
 		    var arch = Environment.Is64BitProcess ? "x64" : "x86";
-		    libraryPath = Path.Combine(AppContext.BaseDirectory, "runtimes", $"{platform}-{arch}", "native");
-            
-		    return libraryPath;
-	    }
-    }
-
-    private static string? libraryPath;
-
-    static NativeRtc()
-    {
-	    NativeLibrary.SetDllImportResolver(typeof(NativeRtc).Assembly, static (libraryName, _, _) =>
-		    NativeLibrary.Load(Path.Combine(LibraryPath, libraryName)));
+		    var runtimePath = Path.Combine(AppContext.BaseDirectory, "runtimes", $"{platform}-{arch}", "native", $"{libraryName}.{suffix}");
+		    return NativeLibrary.Load(runtimePath);
+	    });
     }
 
     internal enum Error
